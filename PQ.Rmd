@@ -1,0 +1,104 @@
+---
+title: "PQ"
+author: "Yigit Ozan Berk"
+date: "7/30/2019"
+output: html_document
+---
+
+
+“Is there an association between college major category and income?”
+
+
+Major_code'a gore dagilima bakilacak
+
+possible confounders:
+- perc_men & perc_women
+- perc_employed
+
+perc_employed icinde
+- perc_employed_fulltime
+- perc_epmloyed_fulltime_yearround
+
+- perc_college_jobs
+- perc_low_wage_jobs
+
+
+
+outcome = income : p25th, median, p75th
+predictor = major_category
+
+butun variable'lari percentage olan kolonlardan almam lazim lineerligi korumak icin
+
+
+
+# p25th
+
+```{r}
+sumCoef <- summary(lm(p25th ~ major_category - 1, data = mycol))
+sumCoef
+```
+
+
+```{r}
+summary(lm(p25th ~ major_category + perc_women - 1, data = mycol))
+```
+
+```{r}
+summary(lm(p25th ~ major_category * perc_women - 1, data = mycol))
+```
+
+
+```{r}
+summary(lm(p25th ~ perc_employed * major_category - 1, data = mycol))
+```
+
+setting up the regression data frames
+
+```{r}
+myp <- mycol[, c(4, 5, 6, 7, 8, 9, 10, 12, 13, 15, 17, 19)]
+myp25 <- myp[, -c(6, 7)]
+myp50 <- myp[, -c(5, 7)]
+myp75 <- myp[, -c(5, 6)]
+```
+
+```{r}
+fit1 <- lm(p25th ~ perc_employed + perc_college_jobs + perc_low_wage_jobs, data = myp25)
+summary(fit1)
+```
+
+```{r}
+summary(lm(p25th ~ perc_employed + perc_college_jobs, data = myp25))
+```
+
+```{r}
+summary(lm(p25th ~ perc_employed, data = myp25))
+```
+
+```{r}
+myp$sample_perc = myp$sample_size/myp$total
+head(myp)
+```
+
+```{r}
+fit2 <- lm(p25th ~ major_category * sample_perc - 1, myp)
+summary(fit2)
+```
+
+
+```{r}
+fit3 <- lm(p25th ~ major_category + perc_women + major_category * perc_women - 1, myp)
+summary(fit3)
+```
+
+```{r}
+fit4 <- lm(p25th ~ major_category + perc_women + major_category * perc_women + perc_college_jobs - 1, myp)
+summary(fit4)
+```
+
+percentage of college jobs or percentage of women is not statistically significant confounders
+
+```{r}
+fit5 <- lm(p25th ~ major_category  - 1, myp)
+summary(fit5)
+```
+
